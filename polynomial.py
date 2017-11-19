@@ -17,27 +17,42 @@ class Polynomial:
                 new_coefficients.append(self.coefficients[i] + other.coefficients[i])
             return Polynomial(new_coefficients)
         else:
-            new_coefficients = self.coefficients
+            #new_coefficients = self.coefficients
+            #new_coefficients[0] = self.coefficients[0] + int(other)
+            new_coefficients = []
+            for i in range(self.n):
+                new_coefficients.append(self.coefficients[i])
             new_coefficients[0] = self.coefficients[0] + int(other)
             return Polynomial(new_coefficients)            
 
     def __sub__(self, other):
-        new_coefficients = []
-        for i in range(max(self.degree(), other.degree())):
-            new_coefficients.append(self.coefficients[i] - other.coefficients[i])
-        return Polynomial(new_coefficients)
-        
+        if isinstance(other, Polynomial):
+            new_coefficients = []
+            for i in range(max(self.degree(), other.degree())):
+                new_coefficients.append(self.coefficients[i] - other.coefficients[i])
+            return Polynomial(new_coefficients)
+        else:
+            for i in range(self.n):
+                new_coefficients.append(self.coefficients[i])
+            new_coefficients[0] = self.coefficients[0] - int(other)
+            return Polynomial(new_coefficients)
 
     def __mul__(self, other):
-        new_coefficients = []
-        for k in range(self.degree() + other.degree() - 1):
-            x = []
-            for i in range(self.degree()):
-                for j in range(other.degree()):
-                    if (i + j == k):
-                        x.append(self.coefficients[i]*other.coefficients[j])
-            new_coefficients.append(sum(x))
-        return Polynomial(new_coefficients)
+        if isinstance(other, Polynomial):
+            new_coefficients = []
+            for k in range(self.degree() + other.degree() - 1):
+                x = []
+                for i in range(self.degree()):
+                    for j in range(other.degree()):
+                        if (i + j == k):
+                            x.append(self.coefficients[i]*other.coefficients[j])
+                new_coefficients.append(sum(x))
+            return Polynomial(new_coefficients)
+        else:
+            new_coefficients = []
+            for i in range(self.n):
+                new_coefficients.append(other*self.coefficients[i])
+            return Polynomial(new_coefficients)
 
     def __mod__(self, number):
         new_coefficients = []
@@ -52,16 +67,16 @@ class Polynomial:
         self.visual = self.visual + "+" + str(self.coefficients[self.n-1]) + "t^" + str(self.n-1)
         return str(self.visual)
 
+    def subst(self, x):
+        result = 0
+        for i in range(0, self.n):
+            result += self.coefficients[i]*(x**i)
+        return result
+
 arr1 = [1,2,3,4,5]
 obj1 = Polynomial(arr1)
 arr2 = [6,7,8,9,10]
 obj2 = Polynomial(arr2)
 print(obj1.coefficients)
 print(obj2.coefficients)
-print(obj1+2)
-print((obj1+2).coefficients)
-print(obj2 + 3)
-print((obj2 + 3).coefficients)
-print(obj1 + obj2)
-print((obj1 + obj2).coefficients)
-        
+print(obj1*2)
