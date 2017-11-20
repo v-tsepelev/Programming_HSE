@@ -3,7 +3,18 @@
 class Polynomial:
 
     def __init__(self, coefficients):
-        self.coefficients = coefficients
+        if isinstance(coefficients, list):
+            self.coefficients = coefficients
+        elif isinstance(coefficients, int):
+            self.coefficients = []
+            self.coefficients.append(coefficients)
+        elif isinstance(coefficients, Polynomial):
+            self.coefficients = coefficients.coefficients
+        elif isinstance(coefficients, dict):
+            self.coefficients = []
+            powers = sorted(coefficients.keys())
+            for i in powers:
+                self.coefficients.append(coefficients[i])
         self.n = len(self.coefficients)
         self.visual = ""
 
@@ -101,12 +112,8 @@ class RealPolynomial(Polynomial):
 
 arr1 = [1,2,3,4,5]
 obj1 = Polynomial(arr1)
-arr2 = [6,7,8,9,10]
+arr2 = {2:4,1:3}
 obj2 = Polynomial(arr2)
-arr3 = [1,1]
-obj3 = Polynomial(arr3)
 print(obj1)
-print(obj1.der())
-print(obj1.der(2))
-print(obj3.der(5))
-print(obj3.dersubst(1))
+print(obj2)
+print(obj2.coefficients)
