@@ -72,11 +72,41 @@ class Polynomial:
         for i in range(0, self.n):
             result += self.coefficients[i]*(x**i)
         return result
+    
+    def der(self, d = 1):
+        #while d != 1:
+            #new_coefficients = []
+            #for i in range(self.n-1):
+                #new_coefficients.append(self.coefficients[i+1]*(i+1))
+            #d -= 1
+            #return der(Polynomial(new_coefficients), d)
+        if d == 1:
+            new_coefficients = []
+            for i in range(self.n-1):
+                new_coefficients.append(self.coefficients[i+1]*(i+1))
+            return Polynomial(new_coefficients)
+        elif d > self.n:
+            return int(0)
+        else:
+            new_coefficients = []
+            for i in range(self.n-1):
+                new_coefficients.append(self.coefficients[i+1]*(i+1))
+            return Polynomial(new_coefficients).der(d-1)
+        
+    def dersubst(self, x, d = 1):
+        return self.der(d).subst(x)
+            
+class RealPolynomial(Polynomial):
+    pass
 
 arr1 = [1,2,3,4,5]
 obj1 = Polynomial(arr1)
 arr2 = [6,7,8,9,10]
 obj2 = Polynomial(arr2)
-print(obj1.coefficients)
-print(obj2.coefficients)
-print(obj1*2)
+arr3 = [1,1]
+obj3 = Polynomial(arr3)
+print(obj1)
+print(obj1.der())
+print(obj1.der(2))
+print(obj3.der(5))
+print(obj3.dersubst(1))
