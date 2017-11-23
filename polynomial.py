@@ -1,4 +1,4 @@
-# This class is currently under development.
+# Module for work with polynomials.
 
 import math
 import cmath
@@ -230,4 +230,3 @@ class DegreeIsTooBig(Exception):
         elif isinstance(self.x, int):
             error = "В результате операции получился многочлен степени {0}, максимально допустимая степень {1}".format(self.x, self.y)
             return error
-
