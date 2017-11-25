@@ -1,7 +1,6 @@
 # Module for work with polynomials.
 
 import math
-import cmath
 
 class Polynomial:
 
@@ -26,11 +25,20 @@ class Polynomial:
         return int(self.n-1)        
 
     def __add__(self, other):
-        if isinstance(other, Polynomial):
+        if isinstance(other, Polynomial) or isinstance(other, QuadraticPolynomial):
             new_coefficients = []
-            for i in range(max(self.degree() + 1, other.degree() + 1)):
+            for i in range(min(self.degree() + 1, other.degree() + 1)):
                 new_coefficients.append(self.coefficients[i] + other.coefficients[i])
-            return Polynomial(new_coefficients)
+            if self.degree() > other.degree():
+                for i in range(other.degree() + 1, self.degree() + 1):
+                    new_coefficients.append(self.coefficients[i])
+            elif self.degree() < other.degree():
+                for i in range(self.degree() + 1, other.degree() + 1):
+                    new_coefficients.append(other.coefficients[i])
+            if isinstance(other, QuadraticPolynomial) and len(new_coefficients) > 3:
+                raise DegreeIsTooBig(len(new_coefficients) - 1)
+            else:
+                return Polynomial(new_coefficients)
         else:
             new_coefficients = []
             for i in range(self.degree() + 1):
@@ -39,11 +47,20 @@ class Polynomial:
             return Polynomial(new_coefficients)            
 
     def __sub__(self, other):
-        if isinstance(other, Polynomial):
+        if isinstance(other, Polynomial) or isinstance(other, QuadraticPolynomial):
             new_coefficients = []
-            for i in range(max(self.degree() + 1, other.degree() + 1)):
+            for i in range(min(self.degree() + 1, other.degree() + 1)):
                 new_coefficients.append(self.coefficients[i] - other.coefficients[i])
-            return Polynomial(new_coefficients)
+            if self.degree() > other.degree():
+                for i in range(other.degree() + 1, self.degree() + 1):
+                    new_coefficients.append(self.coefficients[i])
+            elif self.degree() < other.degree():
+                for i in range(self.degree() + 1, other.degree() + 1):
+                    new_coefficients.append(-other.coefficients[i])
+            if isinstance(other, QuadraticPolynomial) and len(new_coefficients) > 3:
+                raise DegreeIsTooBig(len(new_coefficients) - 1)
+            else:
+                return Polynomial(new_coefficients)
         else:
             for i in range(self.degree() + 1):
                 new_coefficients.append(self.coefficients[i])
@@ -57,7 +74,7 @@ class Polynomial:
         return Polynomial(new_coefficients)
 
     def __mul__(self, other):
-        if isinstance(other, Polynomial):
+        if isinstance(other, Polynomial) or isinstance(other, QuadraticPolynomial):
             new_coefficients = []
             for k in range(self.degree() + other.degree() + 1):
                 x = []
@@ -66,7 +83,10 @@ class Polynomial:
                         if (i + j == k):
                             x.append(self.coefficients[i]*other.coefficients[j])
                 new_coefficients.append(sum(x))
-            return Polynomial(new_coefficients)
+            if isinstance(other, QuadraticPolynomial) and len(new_coefficients) > 3:
+                raise DegreeIsTooBig(len(new_coefficients) - 1)
+            else:
+                return Polynomial(new_coefficients)
         else:
             new_coefficients = []
             for i in range(self.degree() + 1):
@@ -92,13 +112,25 @@ class Polynomial:
         if self.degree() == 0:
             return str(self.coefficients[0])
         elif self.degree() == 1:
-            self.visual = str(self.coefficients[0]) + "+" + str(self.coefficients[1]) + "t"
+            if self.coefficients[1] < 0:
+                self.visual = str(self.coefficients[0]) + str(self.coefficients[1]) + "t"
+            else:
+                self.visual = str(self.coefficients[0]) + "+" + str(self.coefficients[1]) + "t"                
             return self.visual
         else:
-            self.visual = str(self.coefficients[0]) + "+" + str(self.coefficients[1]) + "t"
+            if self.coefficients[1] < 0:
+                self.visual = str(self.coefficients[0]) + str(self.coefficients[1]) + "t"                
+            else:
+                self.visual = str(self.coefficients[0]) + "+" + str(self.coefficients[1]) + "t"                
             for i in range(2, self.degree()):
-                self.visual = self.visual + "+" + str(self.coefficients[i]) + "t^" + str(i)
-            self.visual = self.visual + "+" + str(self.coefficients[self.degree()]) + "t^" + str(self.degree())
+                if self.coefficients[i] < 0:
+                    self.visual = self.visual + str(self.coefficients[i]) + "t^" + str(i)                    
+                else:
+                    self.visual = self.visual + "+" + str(self.coefficients[i]) + "t^" + str(i)                        
+            if self.coefficients[self.degree()] < 0:
+                self.visual = self.visual + str(self.coefficients[self.degree()]) + "t^" + str(self.degree())
+            else:
+                self.visual = self.visual + "+" + str(self.coefficients[self.degree()]) + "t^" + str(self.degree())                
             return self.visual
 
     def subst(self, x):
@@ -145,8 +177,8 @@ class Polynomial:
             
 class RealPolynomial(Polynomial):
     
-    def find_root(self, left_x, right_x, epsilon = 0.01):
-        if self.degree() % 2 == 1:
+    def find_root(self, left_x = "none", right_x = "none", epsilon = 0.01):
+        if isinstance(left_x, int) and isinstance(right_x, int) and self.subst(left_x)*self.subst(right_x) < 0:
             a = left_x
             b = right_x
             while abs(b - a) > epsilon:
@@ -157,6 +189,13 @@ class RealPolynomial(Polynomial):
                     b = c
             root = (a + b) / 2
             return root
+        else:
+            a = -1000
+            b = 1000
+            while self.subst(a)*self.subst(b) >= 0:
+                a *= 2
+                b *= 2
+            return self.find_root(a, b)
         
     def locmin_value(self, left_x, right_x):
         x = self.der().find_root(left_x, right_x, epsilon = 0.01)
@@ -175,8 +214,51 @@ class QuadraticPolynomial(Polynomial):
         if self.degree() > 2:
             raise Exception("Вы пытаетесь создать многочлен степени, большей чем 2")
 
+    def __add__(self, other):
+        if isinstance(other, Polynomial) or isinstance(other, QuadraticPolynomial):
+            new_coefficients = []
+            for i in range(min(self.degree() + 1, other.degree() + 1)):
+                new_coefficients.append(self.coefficients[i] + other.coefficients[i])
+            if self.degree() > other.degree():
+                for i in range(other.degree() + 1, self.degree() + 1):
+                    new_coefficients.append(self.coefficients[i])
+            elif self.degree() < other.degree():
+                for i in range(self.degree() + 1, other.degree() + 1):
+                    new_coefficients.append(other.coefficients[i])
+            if len(new_coefficients) > 3:
+                raise DegreeIsTooBig(len(new_coefficients) - 1)
+            else:
+                return QuadraticPolynomial(new_coefficients)
+        else:
+            new_coefficients = []
+            for i in range(self.degree() + 1):
+                new_coefficients.append(self.coefficients[i])
+            new_coefficients[0] = self.coefficients[0] + int(other)
+            return QuadraticPolynomial(new_coefficients)            
+
+    def __sub__(self, other):
+        if isinstance(other, Polynomial) or isinstance(other, QuadraticPolynomial):
+            new_coefficients = []
+            for i in range(min(self.degree() + 1, other.degree() + 1)):
+                new_coefficients.append(self.coefficients[i] - other.coefficients[i])
+            if self.degree() > other.degree():
+                for i in range(other.degree() + 1, self.degree() + 1):
+                    new_coefficients.append(self.coefficients[i])
+            elif self.degree() < other.degree():
+                for i in range(self.degree() + 1, other.degree() + 1):
+                    new_coefficients.append(-other.coefficients[i])
+            if len(new_coefficients) > 3:
+                raise DegreeIsTooBig(len(new_coefficients) - 1)
+            else:
+                return QuadraticPolynomial(new_coefficients)
+        else:
+            for i in range(self.degree() + 1):
+                new_coefficients.append(self.coefficients[i])
+            new_coefficients[0] = self.coefficients[0] - int(other)
+            return QuadraticPolynomial(new_coefficients)
+
     def __mul__(self, other):
-        if isinstance(other, Polynomial):
+        if isinstance(other, Polynomial) or isinstance(other, QuadraticPolynomial):
             new_coefficients = []
             for k in range(self.degree() + other.degree() + 1):
                 x = []
@@ -185,16 +267,15 @@ class QuadraticPolynomial(Polynomial):
                         if (i + j == k):
                             x.append(self.coefficients[i]*other.coefficients[j])
                 new_coefficients.append(sum(x))
-            result = Polynomial(new_coefficients)
-            if result.degree() > 2:
-                raise DegreeIsTooBig(result.degree())
+            if len(new_coefficients) > 3:
+                raise DegreeIsTooBig(len(new_coefficients) - 1)
             else:
-                return result
+                return QuadraticPolynomial(new_coefficients)
         else:
             new_coefficients = []
             for i in range(self.degree() + 1):
                 new_coefficients.append(other*self.coefficients[i])
-            return Polynomial(new_coefficients)
+            return QuadraticPolynomial(new_coefficients)
 
     def solve(self):
         if self.degree() == 0:
@@ -214,9 +295,7 @@ class QuadraticPolynomial(Polynomial):
                 x2 = (-b-D**0.5)(2*a)
                 return [x1, x2]
             elif D < -1e-10:
-                c1 = (-b+cmath.sqrt(D))/(2*a)
-                c2 = (-b-cmath.sqrt(D))/(2*a)
-                return [c1, c2]
+                return []
         
 class DegreeIsTooBig(Exception):
     
@@ -230,3 +309,4 @@ class DegreeIsTooBig(Exception):
         elif isinstance(self.x, int):
             error = "В результате операции получился многочлен степени {0}, максимально допустимая степень {1}".format(self.x, self.y)
             return error
+
