@@ -1,4 +1,5 @@
 # Module for work with polynomials.
+# Author: Vladimir Tsepelev, tsepelev at openmailbox.org
 
 import math
 
