@@ -1,9 +1,3 @@
-
-# coding: utf-8
-
-# In[2]:
-
-
 class Node:
     
     def __init__(self, key, parent = None, nil = None):
@@ -29,11 +23,13 @@ class BTree:
                 self._add(key, node.left)
             else:
                 node.left = Node(key)
+                node.left.par = node
         else:
             if (node.right != None):
                 self._add(key, node.right)
             else:
                 node.right = Node(key)
+                node.right.par = node
     
     def find(self, key):
         if (self.root != None):
@@ -50,18 +46,46 @@ class BTree:
             return self._find(key, node.right)
         else:
             return None
-    
+
     def delete(self, key):
-        pass
+        def _delete(node, key):
+            if node.key == key:
+                if not (node.left and node.right):
+                    return node.left or node.right, True
+                else:
+                    successor, parent = node.right, node
+                    while successor.left:
+                        successor, parent = successor.left, successor
+                    successor.left = node.left
+                    if parent != node:
+                        parent.left = successor.right
+                        successor.right = node.right
+                    return successor, True
+            elif key < node.key and node.left:
+                node.left, deleted = _delete(node.left, key)
+                return node, deleted
+            elif key > node.key and node.right:
+                node.right, deleted = _delete(node.right, key)
+                return node, deleted
+            return node, False
+        if self.root is None:
+            return False
+        self.root, deleted = _delete(self.root, key)
+        return deleted
     
     def get_oredered_list(self):
-        pass
+        aNode = self.root
+        def makeList(self, aNode):
+            if aNode is None:
+                return []
+            return makeList(self, aNode.left) + [aNode.key] + makeList(self, aNode.right)
+        return makeList(self, aNode)
     
     def get_min(self):
-        pass
+        return self.get_oredered_list()[0]
     
     def get_max(self):
-        pass
+        return self.get_oredered_list()[len(self.get_oredered_list())-1]
 
     def printTree(self):
         if (self.root != None):
@@ -74,9 +98,12 @@ class BTree:
             self._printTree(node.right)
 
 tree = BTree()
-tree.add(2)
-tree.add(3)
-tree.add(4)
 tree.add(9)
+tree.add(13)
+tree.add(4)
+tree.add(2)
+tree.add(1)
+tree.add(1787)
 tree.printTree()
-print(tree.find(4))
+print(tree.get_oredered_list())
+print(tree.get_max())
