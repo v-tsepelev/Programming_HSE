@@ -1,8 +1,8 @@
 class MyHashTable:
     
     def __init__(self, n):
-        self.table = [None] * n
         self.size = int(n)
+        self.table = [[] for i in range(self.size)]        
 
     def char2int(self,char):
         if char >= 'A' and char <= 'Z':
@@ -13,14 +13,7 @@ class MyHashTable:
             raise NameError('Invalid character in key! Alphabet is [a-z][A-Z]')       
     
     def hash_function(self, x):
-#        if type(x) is str:
-#            position = ((len(x)**2) % self.size)
-#        if type(x) is int:
-#            position = ((x**2) % self.size)
-#        return position
         hash = 0
-#        for i, c in enumerate (x):
-#            hash += pow(52, len(x) - i - 1) * self.char2int(c)
         for i in range(x):
             hash += pow(52, x - i - 1) * x
         return hash % self.size       
@@ -33,27 +26,24 @@ class MyHashTable:
         return output
     
     def add(self, key):
-        if None in self.table:
-            if self.table[self.hash_function(key)] == None:
-                self.table[self.hash_function(key)] = key
-                return True
-            else:
-                return False
+        if key not in self.table[self.hash_function(key)]:
+            self.table[self.hash_function(key)].append(key)
+            return True
         else:
-            self.table.append(key)
+            return False
     
     def delete(self, key):
-        if self.table[self.hash_function(key)] == None:
+        if key not in self.table[self.hash_function(key)]:
             return False
         else:
-            del self.table[self.hash_function(key)]
+            del self.table[self.hash_function(key)][self.table[self.hash_function(key)].index(key)]
             return True
     
     def print_sorted(self):
         sorted_table = []
         for i in self.table:
-            if i != None:
-                sorted_table.append(i)
+            for j in i:
+                sorted_table.append(j)
         sorted_table.sort()
         if not sorted_table:
             return "List is empty!"
@@ -66,13 +56,6 @@ class MyHashTable:
                 output += str(sorted_table[len(sorted_table) - 1])
         return output
     
-#table = MyHashTable(7)
-#table.add(10)
-#table.add(100)
-#table.add(3)
-#print(table.print_sorted())
-#print(table.delete(3), table.delete(33), table.delete(10))
-#print(table.print_sorted())
 mt = MyHashTable(7)
 mt.add(94)
 mt.add(13)
@@ -85,5 +68,3 @@ mt.add(76)
 mt.add(68)
 mt.add(84)
 print(mt.print_sorted())
-
-
