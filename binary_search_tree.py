@@ -1,22 +1,23 @@
 class Node:
-    
-    def __init__(self, key, parent = None, nil = None):
+
+    def __init__(self, key, parent=None, nil=None):
         self.key = key
         self.par = parent
         self.left = nil
         self.right = nil
-        
+
+
 class BTree:
-    
-    def __init__(self, root = None):
+
+    def __init__(self, root=None):
         self.root = root
-    
+
     def add(self, key):
         if (self.root == None):
             self.root = Node(key)
         else:
             self._add(key, self.root)
-            
+
     def _add(self, key, node):
         if (key < node.key):
             if (node.left != None):
@@ -30,7 +31,7 @@ class BTree:
             else:
                 node.right = Node(key)
                 node.right.par = node
-    
+
     def find(self, key):
         if (self.root != None):
             return self._find(key, self.root)
@@ -72,20 +73,21 @@ class BTree:
             return False
         self.root, deleted = _delete(self.root, key)
         return deleted
-    
+
     def get_oredered_list(self):
         aNode = self.root
+
         def makeList(self, aNode):
             if aNode is None:
                 return []
             return makeList(self, aNode.left) + [aNode.key] + makeList(self, aNode.right)
-        return makeList(self, aNode)
-    
+        return list(dict.fromkeys(makeList(self, aNode)))
+
     def get_min(self):
         return self.get_oredered_list()[0]
-    
+
     def get_max(self):
-        return self.get_oredered_list()[len(self.get_oredered_list())-1]
+        return self.get_oredered_list()[len(self.get_oredered_list()) - 1]
 
     def printTree(self):
         if (self.root != None):
@@ -96,14 +98,3 @@ class BTree:
             self._printTree(node.left)
             print(str(node.key) + ' ')
             self._printTree(node.right)
-
-tree = BTree()
-tree.add(9)
-tree.add(13)
-tree.add(4)
-tree.add(2)
-tree.add(1)
-tree.add(1787)
-tree.printTree()
-print(tree.get_oredered_list())
-print(tree.get_max())
