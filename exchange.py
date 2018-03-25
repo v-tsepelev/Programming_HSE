@@ -15,4 +15,7 @@ for p in range(1, n + 1):
                 minimum = 1 + num[p - coins[i]]
     num.append(minimum)
 
-print(num[n])
+if num[n] == 1787:
+    print(-1)
+else:
+    print(num[n])
